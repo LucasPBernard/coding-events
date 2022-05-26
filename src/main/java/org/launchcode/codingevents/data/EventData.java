@@ -29,5 +29,11 @@ public class EventData {
         events.remove(id);
     }
 
+//    public static void remove(Integer id) {
+//        if (events.containsKey(id)) {
+//            events.remove(id);
+//        }
+//    }
+
 
 }
