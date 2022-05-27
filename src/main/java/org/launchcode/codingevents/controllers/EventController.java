@@ -34,7 +34,6 @@ public class EventController {
         model.addAttribute("title", "Create Event");
         model.addAttribute(new Event());
         model.addAttribute("types", EventType.values());
-
         return "events/create";
     }
 
@@ -50,10 +49,11 @@ public String processCreateEventForm(@ModelAttribute @Valid Event newEvent, Erro
     if(errors.hasErrors()) {
         model.addAttribute("title", "Create Event");
         model.addAttribute("errorMsg", "Bad data!");
+        model.addAttribute("types", EventType.values());
         return "events/create";
     }
         EventData.add(newEvent);
-    //System.out.println(newEvent.getId());
+    System.out.println(newEvent.getType());
     return "redirect:";
 }
 
@@ -81,17 +81,20 @@ public String processCreateEventForm(@ModelAttribute @Valid Event newEvent, Erro
         model.addAttribute("event", eventToEdit);
         String title = "Edit Event " + eventToEdit.getName() + " (id=" + eventToEdit.getId() + ")";
         model.addAttribute("title", title );
+        model.addAttribute("types", EventType.values());
         return "events/edit";
     }
 
     @PostMapping("edit")
-    public String processEditForm(int eventId, String name, String description, String contactEmail) {
+    public String processEditForm(int eventId, String name, String description, String contactEmail, EventType type, String location,Integer numOfAttendees,Boolean shouldRegister) {
         Event eventToEdit = EventData.getById(eventId);
         eventToEdit.setName(name);
         eventToEdit.setDescription(description);
         eventToEdit.setContactEmail(contactEmail);
-//        System.out.println(eventToEdit.getName());
-//        System.out.println(eventToEdit.getDescription());
+        eventToEdit.setType(type);
+        eventToEdit.setLocation(location);
+        eventToEdit.setNumOfAttendees(numOfAttendees);
+        eventToEdit.setShouldRegister(shouldRegister);
         return "redirect:";
     }
 
