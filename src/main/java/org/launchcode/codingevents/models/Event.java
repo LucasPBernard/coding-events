@@ -1,15 +1,14 @@
 package org.launchcode.codingevents.models;
 
+import javax.persistence.Entity;
+import javax.persistence.ManyToOne;
 import javax.validation.constraints.*;
-import java.util.Objects;
 
 /**
  * Created by Chris Bay
  */
-public class Event {
-
-    private int id;
-    private static int nextId = 1;
+@Entity
+public class Event extends AbstractEntity {
 
     @NotBlank(message = "Name is required")
     @Size(min = 3, max = 50, message = "Name must be between 3 and 50 characters")
@@ -35,23 +34,21 @@ public class Event {
     @Min(value = 1, message = "At least 1 attendee is required")
     private Integer numOfAttendees;
 
-    private EventType type;
+    @ManyToOne
+    @NotNull(message = "Category is required")
+    private EventCategory eventCategory;
 
-    public Event(String name, String description, String contactEmail, EventType type, String location,Integer numOfAttendees,boolean shouldRegister) {
-        this();
+    public Event(String name, String description, String contactEmail, EventCategory eventCategory, String location,Integer numOfAttendees,boolean shouldRegister) {
         this.name = name;
         this.description = description;
         this.contactEmail = contactEmail;
-        this.type = type;
+        this.eventCategory = eventCategory;
         this.location = location;
         this.numOfAttendees = numOfAttendees;
         this.shouldRegister = shouldRegister;
     }
 
-    public Event(){
-        this.id = nextId;
-        nextId++;
-    }
+    public Event(){ }
 
     public String getName() {
         return name;
@@ -69,10 +66,6 @@ public class Event {
         this.description = description;
     }
 
-    public int getId() {
-        return id;
-    }
-
     public String getContactEmail() {
         return contactEmail;
     }
@@ -81,12 +74,12 @@ public class Event {
         this.contactEmail = contactEmail;
     }
 
-    public EventType getType() {
-        return type;
+    public EventCategory getEventCategory() {
+        return eventCategory;
     }
 
-    public void setType(EventType type) {
-        this.type = type;
+    public void setEventCategory(EventCategory eventCategory) {
+        this.eventCategory = eventCategory;
     }
 
     public String getLocation() {
@@ -118,16 +111,4 @@ public class Event {
         return name;
     }
 
-    @Override
-    public boolean equals(Object o) {
-        if (this == o) return true;
-        if (o == null || getClass() != o.getClass()) return false;
-        Event event = (Event) o;
-        return id == event.id;
-    }
-
-    @Override
-    public int hashCode() {
-        return Objects.hash(id);
-    }
 }
