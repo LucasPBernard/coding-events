@@ -3,8 +3,11 @@ package org.launchcode.codingevents.controllers;
 import org.launchcode.codingevents.data.EventCategoryRepository;
 import org.launchcode.codingevents.data.EventData;
 import org.launchcode.codingevents.data.EventRepository;
+import org.launchcode.codingevents.data.TagRepository;
 import org.launchcode.codingevents.models.Event;
 import org.launchcode.codingevents.models.EventCategory;
+import org.launchcode.codingevents.models.Tag;
+import org.launchcode.codingevents.models.dto.EventTagDTO;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Controller;
 import org.springframework.ui.Model;
@@ -12,6 +15,7 @@ import org.springframework.validation.Errors;
 import org.springframework.web.bind.annotation.*;
 
 import javax.validation.Valid;
+import java.util.Optional;
 
 /**
  * Created by Chris Bay
@@ -25,6 +29,9 @@ public class EventController {
 
     @Autowired
     private EventCategoryRepository eventCategoryRepository;
+
+    @Autowired
+    private TagRepository tagRepository;
 
     @GetMapping
     public String displayAllEvents(Model model) {
@@ -41,18 +48,18 @@ public class EventController {
         return "events/create";
     }
 
-@PostMapping("create")
-public String processCreateEventForm(@ModelAttribute @Valid Event newEvent, Errors errors, Model model) {
-    if(errors.hasErrors()) {
-        model.addAttribute("title", "Create Event");
-        model.addAttribute("errorMsg", "Bad data!");
-        model.addAttribute("categories", eventCategoryRepository.findAll());
-        return "events/create";
+    @PostMapping("create")
+    public String processCreateEventForm(@ModelAttribute @Valid Event newEvent, Errors errors, Model model) {
+        if(errors.hasErrors()) {
+            model.addAttribute("title", "Create Event");
+            model.addAttribute("errorMsg", "Bad data!");
+            model.addAttribute("categories", eventCategoryRepository.findAll());
+            return "events/create";
+        }
+            eventRepository.save(newEvent);
+        //System.out.println(newEvent.getType());
+        return "redirect:";
     }
-        eventRepository.save(newEvent);
-    //System.out.println(newEvent.getType());
-    return "redirect:";
-}
 
     @GetMapping("delete")
     public String displayDeleteEventForm(Model model) {
@@ -74,26 +81,79 @@ public String processCreateEventForm(@ModelAttribute @Valid Event newEvent, Erro
     }
     @GetMapping("edit/{eventId}")
     public String displayEditForm(Model model, @PathVariable int eventId){
-        Event eventToEdit = EventData.getById(eventId);
-        System.out.println(eventRepository.findById(eventId));
-        model.addAttribute("event", eventToEdit);
-        String title = "Edit Event " + eventToEdit.getName() + " (id=" + eventToEdit.getId() + ")";
-        model.addAttribute("title", title );
-        model.addAttribute("types", eventCategoryRepository.findAll());
-        return "events/edit";
+        Optional<Event> eventToEdit = eventRepository.findById(eventId);
+        if (eventToEdit.isEmpty()){
+            System.out.println(eventRepository.findById(eventId));
+            return "events/edit";
+        } else {
+            Event event = eventToEdit.get();
+            model.addAttribute("event", event);
+            System.out.println(eventRepository.findById(eventId));
+//            model.addAttribute("event", eventToEdit);
+//            String title = "Edit Event " + eventToEdit.get();
+//            model.addAttribute("title", title);
+            model.addAttribute("categories", eventCategoryRepository.findAll());
+            return "events/edit";
+        }
     }
 
     @PostMapping("edit")
-    public String processEditForm(int eventId, String name, String description, String contactEmail, EventCategory eventCategory, String location, Integer numOfAttendees, Boolean shouldRegister) {
-        Event eventToEdit = EventData.getById(eventId);
-        eventToEdit.setName(name);
-        eventToEdit.setDescription(description);
-        eventToEdit.setContactEmail(contactEmail);
-        eventToEdit.setEventCategory(eventCategory);
-        eventToEdit.setLocation(location);
-        eventToEdit.setNumOfAttendees(numOfAttendees);
-        eventToEdit.setShouldRegister(shouldRegister);
+    public String processEditForm(@RequestParam int eventId) {
+        //Event eventToEdit = EventData.getById(eventId);
+        Optional<Event> eventToEdit = eventRepository.findById(eventId);
+//        eventToEdit.setName(name);
+//        eventToEdit.setDescription(description);
+//        eventToEdit.setContactEmail(contactEmail);
+//        eventToEdit.setEventCategory(eventCategory);
+//        eventToEdit.setLocation(location);
+//        eventToEdit.setNumOfAttendees(numOfAttendees);
+//        eventToEdit.setShouldRegister(shouldRegister);
         return "redirect:";
+    }
+
+    @GetMapping("detail")
+    public String displayEventDetails(@RequestParam Integer eventId, Model model) {
+
+        Optional<Event> result = eventRepository.findById(eventId);
+
+        if (result.isEmpty()) {
+            model.addAttribute("title", "Invalid Event ID: " + eventId);
+        } else {
+            Event event = result.get();
+            model.addAttribute("title", event.getName() + " Details");
+            model.addAttribute("event", event);
+            model.addAttribute("tags", event.getTags());
+        }
+
+        return "events/detail";
+    }
+
+    @GetMapping("add-tag")
+    public String displayAddTagForm(@RequestParam Integer eventId, Model model){
+        Optional<Event> result = eventRepository.findById(eventId);
+        Event event = result.get();
+        model.addAttribute("title", "Add Tag to: " + event.getName());
+        model.addAttribute("tags", tagRepository.findAll());
+        EventTagDTO eventTag = new EventTagDTO();
+        eventTag.setEvent(event);
+        model.addAttribute("eventTag", eventTag);
+        return "events/add-tag.html";
+    }
+
+    @PostMapping("add-tag")
+    public String processAddTadForm(@ModelAttribute @Valid EventTagDTO eventTag,
+                                    Errors errors,
+                                    Model model){
+        if (!errors.hasErrors()) {
+            Event event = eventTag.getEvent();
+            Tag tag = eventTag.getTag();
+            if (!event.getTags().contains(tag)) {
+                event.addTag(tag);
+                eventRepository.save(event);
+            }
+            return "redirect:detail?eventId=" +event.getId();
+        }
+        return "events/add-tag.html";
     }
 
 }

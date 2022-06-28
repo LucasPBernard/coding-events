@@ -1,12 +1,11 @@
 package org.launchcode.codingevents.models;
 
-import javax.persistence.Entity;
-import javax.persistence.ManyToOne;
+import javax.persistence.*;
+import javax.validation.Valid;
 import javax.validation.constraints.*;
+import java.util.ArrayList;
+import java.util.List;
 
-/**
- * Created by Chris Bay
- */
 @Entity
 public class Event extends AbstractEntity {
 
@@ -14,39 +13,21 @@ public class Event extends AbstractEntity {
     @Size(min = 3, max = 50, message = "Name must be between 3 and 50 characters")
     private String name;
 
-    @Size(max = 500, message = "Description too long!")
-    @NotBlank(message = "Description is required")
-    @NotNull(message = "Description is required")
-    private String description;
-
-    @NotBlank(message = "Email is required")
-    @Email(message = "Invalid email. Try again.")
-    private String contactEmail;
-
-    @NotBlank(message = "Location is required")
-    @NotNull(message = "Location is required")
-    private String location;
-
-    @AssertTrue(message = "This event must have attendees register")
-    private boolean shouldRegister = true;
-
-    @NotNull(message = "At least 1 attendee is required")
-    @Min(value = 1, message = "At least 1 attendee is required")
-    private Integer numOfAttendees;
+    @OneToOne(cascade = CascadeType.ALL)
+    @Valid
+    @NotNull
+    private EventDetails eventDetails;
 
     @ManyToOne
     @NotNull(message = "Category is required")
     private EventCategory eventCategory;
 
-    public Event(String name, String description, String contactEmail, EventCategory eventCategory, String location,Integer numOfAttendees,boolean shouldRegister) {
+    public Event(String name, EventCategory eventCategory) {
         this.name = name;
-        this.description = description;
-        this.contactEmail = contactEmail;
         this.eventCategory = eventCategory;
-        this.location = location;
-        this.numOfAttendees = numOfAttendees;
-        this.shouldRegister = shouldRegister;
     }
+    @ManyToMany
+    private final List<Tag> tags = new ArrayList<>();
 
     public Event(){ }
 
@@ -58,21 +39,6 @@ public class Event extends AbstractEntity {
         this.name = name;
     }
 
-    public String getDescription() {
-        return description;
-    }
-
-    public void setDescription(String description) {
-        this.description = description;
-    }
-
-    public String getContactEmail() {
-        return contactEmail;
-    }
-
-    public void setContactEmail(String contactEmail) {
-        this.contactEmail = contactEmail;
-    }
 
     public EventCategory getEventCategory() {
         return eventCategory;
@@ -82,28 +48,19 @@ public class Event extends AbstractEntity {
         this.eventCategory = eventCategory;
     }
 
-    public String getLocation() {
-        return location;
+    public EventDetails getEventDetails() {
+        return eventDetails;
     }
 
-    public void setLocation(String location) {
-        this.location = location;
+    public void setEventDetails(EventDetails eventDetails) {
+        this.eventDetails = eventDetails;
     }
 
-    public boolean isShouldRegister() {
-        return shouldRegister;
+    public List<Tag> getTags() {
+        return tags;
     }
-
-    public void setShouldRegister(boolean shouldRegister) {
-        this.shouldRegister = shouldRegister;
-    }
-
-    public Integer getNumOfAttendees() {
-        return numOfAttendees;
-    }
-
-    public void setNumOfAttendees(Integer numOfAttendees) {
-        this.numOfAttendees = numOfAttendees;
+    public void addTag(Tag tag){
+        this.tags.add(tag);
     }
 
     @Override
