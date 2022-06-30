@@ -27,6 +27,8 @@
 </table>
 
 <a th:href="'/events/add-tag?eventId=' + ${event.id}">Add Tag</a>
+<br>
+<a th:href="@{/events/edit/{id}(id=${event.id})}">Edit</a>
 
 
 </body>

@@ -47,10 +47,14 @@
     <thead>
     <tr>
         <th>Event Name</th>
+        <th></th>
     </tr>
     </thead>
     <tr th:each="event : ${events}">
         <td><a th:href="'/events/detail?eventId=' + ${event.id}" th:text="${event.name}"></a></td>
+        <td>
+            <a th:href="@{/events/edit/{id}(id=${event.id})}">Edit</a>
+        </td>
     </tr>
 </table>
 

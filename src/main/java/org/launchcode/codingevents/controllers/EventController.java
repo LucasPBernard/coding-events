@@ -6,6 +6,7 @@ import org.launchcode.codingevents.data.EventRepository;
 import org.launchcode.codingevents.data.TagRepository;
 import org.launchcode.codingevents.models.Event;
 import org.launchcode.codingevents.models.EventCategory;
+import org.launchcode.codingevents.models.EventDetails;
 import org.launchcode.codingevents.models.Tag;
 import org.launchcode.codingevents.models.dto.EventTagDTO;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -83,26 +84,28 @@ public class EventController {
     public String displayEditForm(Model model, @PathVariable int eventId){
         Optional<Event> eventToEdit = eventRepository.findById(eventId);
         if (eventToEdit.isEmpty()){
-            System.out.println(eventRepository.findById(eventId));
-            return "events/edit";
         } else {
             Event event = eventToEdit.get();
             model.addAttribute("event", event);
-            System.out.println(eventRepository.findById(eventId));
+            //System.out.println(eventRepository.findById(eventId));
 //            model.addAttribute("event", eventToEdit);
-//            String title = "Edit Event " + eventToEdit.get();
-//            model.addAttribute("title", title);
+            String title = "Edit Event " + eventToEdit.get();
+            model.addAttribute("title", title);
             model.addAttribute("categories", eventCategoryRepository.findAll());
-            return "events/edit";
-        }
+        }return "events/edit";
     }
 
     @PostMapping("edit")
-    public String processEditForm(@RequestParam int eventId) {
-        //Event eventToEdit = EventData.getById(eventId);
+    public String processEditForm(@RequestParam int eventId, String name) {
         Optional<Event> eventToEdit = eventRepository.findById(eventId);
-//        eventToEdit.setName(name);
-//        eventToEdit.setDescription(description);
+        Event event = eventToEdit.get();
+        //event.setName(name);
+        //event.setEventDetails(eventDetails);
+        //event.setEventCategory(eventCategory);
+        System.out.println(event);
+        System.out.println(name);
+        System.out.println(event.getName());
+        System.out.println(event.getEventCategory().toString());
 //        eventToEdit.setContactEmail(contactEmail);
 //        eventToEdit.setEventCategory(eventCategory);
 //        eventToEdit.setLocation(location);
